@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  
+  // Profile enhancements
+  username      String?   @unique
+  background    String?
+  bio           String?
+  status        String    @default("OFFLINE") // ONLINE, OFFLINE
+  lastSeen      DateTime  @default(now())
+  
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Messenger relations
+  messages      Message[]
+  channels      Channel[] @relation("ChannelMembers")
+  ownedChannels Channel[] @relation("ChannelOwner")
+  adminChannels Channel[] @relation("ChannelAdmins")
+  reactions     Reaction[]
+  readReceipts  ReadReceipt[]
+  chatThemes    ChatTheme[]
+  deletedMessages Message[] @relation("MessageDeletedBy")
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Channel {
+  id          String    @id @default(cuid())
+  name        String?
+  description String?
+  icon        String?
+  isGroup     Boolean   @default(false)
+  isSupergroup Boolean  @default(false)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  ownerId     String?
+  owner       User?     @relation("ChannelOwner", fields: [ownerId], references: [id])
+  
+  members     User[]    @relation("ChannelMembers")
+  admins      User[]    @relation("ChannelAdmins")
+  messages    Message[]
+  topics      Topic[]
+  themes      ChatTheme[]
+}
+
+model Topic {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  channelId   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  channel     Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  messages    Message[]
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  text        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  status      String   @default("SENT") // SENT, DELIVERED, READ
+  editedAt    DateTime?
+  
+  userId      String
+  channelId   String
+  topicId     String?
+  
+  // Replies
+  replyToId   String?
+  replyTo     Message?  @relation("Replies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies     Message[] @relation("Replies")
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel     Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  topic       Topic?    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  
+  attachments Attachment[]
+  reactions   Reaction[]
+  readBy      ReadReceipt[]
+  deletedBy   User[]    @relation("MessageDeletedBy")
+}
+
+model Attachment {
+  id          String   @id @default(cuid())
+  url         String
+  type        String   // IMAGE, VIDEO, AUDIO, FILE
+  name        String?
+  size        Int?
+  
+  messageId   String
+  message     Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+}
+
+model Reaction {
+  id          String   @id @default(cuid())
+  emoji       String
+  
+  userId      String
+  messageId   String
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message     Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, messageId, emoji])
+}
+
+model ReadReceipt {
+  id          String   @id @default(cuid())
+  userId      String
+  messageId   String
+  readAt      DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message     Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, messageId])
+}
+model ChatTheme {
+  id        String   @id @default(cuid())
+  userId    String
+  channelId String
+  theme     String   @default("DEFAULT")
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, channelId])
+}
