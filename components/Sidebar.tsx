@@ -10,6 +10,7 @@ import { LogOut, Edit3 } from "lucide-react";
 import { useSocket } from "@/components/providers/socket-provider";
 import { useRouter } from "next/navigation";
 import SearchModal from "./SearchModal";
+import SettingsModal from "./SettingsModal";
 
 interface Channel {
   id: string;
@@ -23,6 +24,7 @@ export default function Sidebar({ channels, currentUser }: { channels: Channel[]
   const { selectedChannelId, setSelectedChannelId, setCurrentStoreUserId } = useChatStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { socket } = useSocket();
   const router = useRouter();
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
@@ -95,7 +97,7 @@ export default function Sidebar({ channels, currentUser }: { channels: Channel[]
     <aside className={`w-80 bg-[#11151c] border-r border-white/5 flex flex-col shrink-0 ${selectedChannelId ? "hidden md:flex" : "flex w-full md:w-80"}`}>
       <div className="p-6 h-16 border-b border-white/5 flex items-center justify-between">
         <h1 className="font-black text-xl tracking-tighter text-blue-500 italic">NOVA</h1>
-        <Settings size={18} className="text-slate-500 cursor-pointer hover:text-white transition" />
+        <Settings size={18} className="text-slate-500 cursor-pointer hover:text-white transition" onClick={() => setIsSettingsOpen(true)} />
       </div>
       
       <div className="p-4">
@@ -199,6 +201,7 @@ export default function Sidebar({ channels, currentUser }: { channels: Channel[]
       <CreateChatModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       <EditProfileModal currentUser={currentUser} />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </aside>
   );
 }

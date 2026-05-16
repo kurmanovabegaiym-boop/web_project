@@ -20,3 +20,68 @@ body {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 10px;
 }
+/* ====== THEME OVERRIDES ====== */
+/* Light Mode overrides for specific tailwind colors used in this app */
+[data-theme='light'] {
+  color-scheme: light;
+}
+
+[data-theme='light'] body {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .bg-\[\#11151c\] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .border-white\/5,
+[data-theme='light'] .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme='light'] .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme='light'] .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme='light'] .hover\:bg-white\/5:hover {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme='light'] .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme='light'] .text-white {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .text-slate-400 {
+  color: #64748b !important;
+}
+
+[data-theme='light'] .text-slate-300 {
+  color: #475569 !important;
+}
+
+[data-theme='light'] .bg-black\/20 {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme='light'] .bg-black\/50 {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+[data-theme='light'] .border-l-2.border-blue-500 {
+  border-color: #3b82f6 !important;
+}
+
+[data-theme='light'] .bg-slate-800 {
+  background-color: #e2e8f0 !important;
+  color: #3b82f6 !important;
+}

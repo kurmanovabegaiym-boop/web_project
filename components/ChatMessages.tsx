@@ -5,6 +5,7 @@ import { useChatSocket } from "@/hooks/use-chat-socket";
 import { format } from "date-fns";
 import axios from "axios";
 import { useChatStore } from "@/hooks/useChatStore";
+import { useSettingsStore } from "@/hooks/useSettingsStore";
 import { THEMES } from "./ChatThemeSelector";
 import { useSocket } from "@/components/providers/socket-provider";
 import { Pencil, Trash2, X, Check as CheckIcon, Check, CheckCheck } from "lucide-react";
@@ -36,6 +37,7 @@ export default function ChatMessages({ conversationId, topicId, currentUserId, c
   const [loadingMore, setLoadingMore] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const { density } = useSettingsStore();
   
   const bottomRef = useRef<HTMLDivElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
@@ -194,7 +196,7 @@ export default function ChatMessages({ conversationId, topicId, currentUserId, c
   }
 
   return (
-    <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-5 space-y-4">
+    <div ref={chatContainerRef} className={`flex-1 overflow-y-auto ${density === 'compact' ? 'p-2 space-y-1' : density === 'spacious' ? 'p-8 space-y-6' : 'p-5 space-y-4'}`}>
       {hasMore && (
         <div ref={topRef} className="flex justify-center py-2">
           {loadingMore ? (
@@ -271,35 +273,10 @@ export default function ChatMessages({ conversationId, topicId, currentUserId, c
             )}
             
             <div className={`flex flex-col gap-1 max-w-[70%] ${isOwn ? 'items-end' : 'items-start'}`}>
-              <div className="flex items-center gap-2 group/bubble">
-                {isOwn && !isEditing && (
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                    <button 
-                      onClick={() => { setEditingId(msg.id); setEditValue(msg.text); }}
-                      className="p-1.5 hover:bg-white/5 rounded-lg text-slate-500 hover:text-blue-400 transition"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button 
-                      onClick={handleDeleteMe}
-                      className="p-1.5 hover:bg-white/5 rounded-lg text-slate-500 hover:text-orange-400 transition"
-                      title="Удалить у себя"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                    {canDeleteEveryone && (
-                      <button 
-                        onClick={handleDeleteEveryone}
-                        className="p-1.5 hover:bg-white/5 rounded-lg text-slate-500 hover:text-red-400 transition"
-                        title="Удалить у всех"
-                      >
-                        <Trash2 size={14} className="fill-current" />
-                      </button>
-                    )}
-                  </div>
-                )}
-                
-                <div className={`px-4 py-2 rounded-2xl shadow-sm flex flex-col min-w-[60px] ${
+              <div className={`flex items-center gap-2 group/bubble ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div className={`shadow-sm flex flex-col min-w-[60px] ${
+                  density === 'compact' ? 'px-3 py-1 text-sm rounded-xl' : density === 'spacious' ? 'px-6 py-4 text-base rounded-3xl' : 'px-4 py-2 text-sm rounded-2xl'
+                } ${
                   isOwn 
                     ? `${currentTheme.bubble} ${currentThemeKey === 'LIGHT' ? 'text-white' : 'text-white'} rounded-br-none` 
                     : `${currentThemeKey === 'LIGHT' ? 'bg-white text-slate-900 border border-slate-200' : 'bg-white/10 text-white'} rounded-bl-none`
@@ -346,7 +323,7 @@ export default function ChatMessages({ conversationId, topicId, currentUserId, c
                       </div>
                     </div>
                   ) : (
-                    <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{msg.text}</p>
+                    <p className={`break-words whitespace-pre-wrap ${density === 'compact' ? 'leading-snug' : density === 'spacious' ? 'leading-loose' : 'leading-relaxed'}`}>{msg.text}</p>
                   )}
                   
                   <div className="text-[10px] opacity-60 mt-1 flex justify-end items-center gap-1">
@@ -359,6 +336,36 @@ export default function ChatMessages({ conversationId, topicId, currentUserId, c
                     )}
                   </div>
                 </div>
+
+                {!isEditing && (
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+                    {isOwn && (
+                      <button 
+                        onClick={() => { setEditingId(msg.id); setEditValue(msg.text); }}
+                        className="p-1.5 hover:bg-white/5 rounded-lg text-slate-500 hover:text-blue-400 transition"
+                        title="Редактировать"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                    )}
+                    <button 
+                      onClick={handleDeleteMe}
+                      className="p-1.5 hover:bg-white/5 rounded-lg text-slate-500 hover:text-orange-400 transition"
+                      title="Удалить у себя"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                    {canDeleteEveryone && (
+                      <button 
+                        onClick={handleDeleteEveryone}
+                        className="p-1.5 hover:bg-white/5 rounded-lg text-slate-500 hover:text-red-400 transition"
+                        title="Удалить у всех"
+                      >
+                        <Trash2 size={14} className="fill-current" />
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
